@@ -27,3 +27,32 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET: /api/topics", () => {
+  test("200: Responds with all topics.", () => {
+    const input = [
+      { description: "Code is love, code is life", slug: "coding" },
+      { description: "FOOTIE!", slug: "football" },
+      {
+        description: "Hey good looking, what you got cooking?",
+        slug: "cooking",
+      },
+    ];
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then(({ body: { topics } }) => {
+        expect(input.length).toBe(3);
+        input.forEach((topic) => {
+          // console.log(topic);
+          expect(typeof topic.description).toBe("string");
+          expect(typeof topic.slug).toBe("string");
+        });
+      });
+    S;
+  });
+
+  test("404: Responds with an error if the api link is invalid.", () => {
+    return request(app).get("/api/topicz").expect(404);
+  });
+});
