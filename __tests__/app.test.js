@@ -56,3 +56,8 @@ describe("GET: /api/topics", () => {
     return request(app).get("/api/topicz").expect(404);
   });
 });
+
+// describe("/api/articles/ID", () => {
+//   test("test a 200 for a valid id", () => {});
+//   test("testing for a 40");
+// });
