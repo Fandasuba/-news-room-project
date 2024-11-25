@@ -7,6 +7,8 @@ exports.fetchObject = (req, res) => {
 };
 
 exports.fetchTopics = (req, res) => {
-  getTopics();
-  res.status(200).send();
+  getTopics().then((rows) => {
+    res.status(200).send(rows);
+    console.log(rows);
+  });
 };
