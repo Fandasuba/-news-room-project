@@ -1,4 +1,9 @@
-const { getTopics, getArticlesById, getAllArticles } = require("./model");
+const {
+  getTopics,
+  getArticlesById,
+  getAllArticles,
+  getCommentsByArticleId,
+} = require("./model");
 const endpointJson = require("./endpoints.json");
 
 exports.fetchObject = (req, res) => {
@@ -34,4 +39,19 @@ exports.fetchArticles = (req, res, next) => {
       res.status(200).send({ articles: rows });
     })
     .catch(next);
+};
+
+exports.fetchCommentsByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+
+  getCommentsByArticleId(article_id)
+    .then((comments) => {
+      res.status(200).send({ comments });
+    })
+    .catch((err) => {
+      if (err.status === 404) {
+        return res.status(404).send({ msg: "Article not found" });
+      }
+      next(err);
+    });
 };
