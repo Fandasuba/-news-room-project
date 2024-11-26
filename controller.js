@@ -14,10 +14,10 @@ exports.fetchTopics = (req, res) => {
 
 exports.fetchArticles = (req, res, next) => {
   const { article_id } = req.params;
-  console.log(article_id, "INSIDE CONTROLLER");
+  // console.log(article_id, "INSIDE CONTROLLER");
   getArticles(article_id)
     .then((rows) => {
-      console.log(rows, "BIG ROW");
+      // console.log(rows, "BIG ROW");
       res.status(200).send({ article: rows });
     })
     .catch(next);
