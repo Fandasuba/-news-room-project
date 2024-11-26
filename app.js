@@ -5,6 +5,7 @@ const {
   fetchTopics,
   fetchArticlesId,
   fetchArticles,
+  fetchCommentsByArticleId,
 } = require("./controller.js");
 
 app.get("/api", fetchObject);
@@ -14,6 +15,8 @@ app.get("/api/topics", fetchTopics);
 app.get("/api/articles/:article_id", fetchArticlesId);
 
 app.get("/api/articles", fetchArticles);
+
+app.get("/api/articles/:article_id/comments", fetchCommentsByArticleId);
 
 app.use((err, req, res, next) => {
   if (err.status) {

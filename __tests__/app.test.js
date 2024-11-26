@@ -141,3 +141,53 @@ describe("/api/articles/ID", () => {
     return request(app).get("/api/articlez").expect(404);
   });
 });
+
+describe("Getting comments related to articles.", () => {
+  test("200: Checks that the article id goes to a live article.", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments).toHaveLength(11);
+        expect(body.comments[0]).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: expect.any(Number),
+          })
+        );
+      });
+  });
+
+  test("200: Checks that article will correctly show the comments it is joined to.", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments.every((comment) => comment.article_id === 1)).toBe(
+          true
+        );
+      });
+  });
+
+  test("200: Checks that the article id with no comments returns an empty array.", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .then(({ body }) => {
+        expect(body.comments).toEqual([]);
+      });
+  });
+
+  test("404: Rejects an article with an invalid article id.", () => {
+    return request(app)
+      .get("/api/articles/404/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article not found");
+      });
+  });
+});
