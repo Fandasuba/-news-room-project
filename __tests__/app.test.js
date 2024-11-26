@@ -4,6 +4,7 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
 const request = require("supertest");
 const app = require("../app");
+const articles = require("../db/data/test-data/articles");
 
 /* Set up your test imports here */
 
@@ -57,7 +58,37 @@ describe("GET: /api/topics", () => {
   });
 });
 
-// describe("/api/articles/ID", () => {
-//   test("test a 200 for a valid id", () => {});
-//   test("testing for a 40");
-// });
+describe("/api/articles/ID", () => {
+  test("test a 200 for a valid id", () => {
+    return request(app).get("/api/articles/5").expect(200);
+  });
+  test("testing the right object keys return relating to the valid id", () => {
+    // const input = articles;
+    return request(app)
+      .get("/api/articles/5")
+      .expect(200)
+      .then(({ body }) => {
+        // console.log(body, "BODY");
+        const { article } = body;
+        // console.log(article, "ARTICLE TEST");
+        expect(typeof article.author).toBe("string");
+        expect(typeof article.title).toBe("string");
+        expect(typeof article.article_id).toBe("number");
+        expect(typeof article.body).toBe("string");
+        expect(typeof article.topic).toBe("string");
+        expect(typeof article.created_at).toBe("string");
+        expect(typeof article.votes).toBe("number");
+        expect(typeof article.article_img_url).toBe("string");
+      });
+  });
+  test("testing for a 404 for invalid id params.", () => {
+    return request(app)
+      .get("/api/articles/404") // Assuming 404 is an ID that doesn't exist
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({
+          msg: "404 - Error not found",
+        });
+      });
+  });
+});
