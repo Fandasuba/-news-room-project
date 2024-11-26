@@ -1,6 +1,5 @@
-const { getTopics, getArticles } = require("./model");
+const { getTopics, getArticlesById, getAllArticles } = require("./model");
 const endpointJson = require("./endpoints.json");
-const db = require("./db/connection");
 
 exports.fetchObject = (req, res) => {
   res.status(200).send({ endpoints: endpointJson });
@@ -12,13 +11,27 @@ exports.fetchTopics = (req, res) => {
   });
 };
 
-exports.fetchArticles = (req, res, next) => {
+exports.fetchArticlesId = (req, res, next) => {
   const { article_id } = req.params;
-  // console.log(article_id, "INSIDE CONTROLLER");
-  getArticles(article_id)
+  getArticlesById(article_id)
+    .then((row) => {
+      res.status(200).send({ article: row });
+    })
+    .catch((err) => {
+      if (err.status === 404) {
+        return res.status(404).send({ msg: "Article not found" });
+      }
+      next(err);
+    });
+};
+
+exports.fetchArticles = (req, res, next) => {
+  getAllArticles()
     .then((rows) => {
-      // console.log(rows, "BIG ROW");
-      res.status(200).send({ article: rows });
+      if (rows.length === 0) {
+        return res.status(404).send({ msg: "No articles found" });
+      }
+      res.status(200).send({ articles: rows });
     })
     .catch(next);
 };
