@@ -5,6 +5,7 @@ const data = require("../db/data/test-data/index");
 const request = require("supertest");
 const app = require("../app");
 const articles = require("../db/data/test-data/articles");
+const jestSorted = require("jest-sorted");
 
 /* Set up your test imports here */
 
@@ -50,7 +51,6 @@ describe("GET: /api/topics", () => {
           expect(typeof topic.slug).toBe("string");
         });
       });
-    S;
   });
 
   test("404: Responds with an error if the api link is invalid.", () => {
@@ -83,12 +83,61 @@ describe("/api/articles/ID", () => {
   });
   test("testing for a 404 for invalid id params.", () => {
     return request(app)
-      .get("/api/articles/404") // Assuming 404 is an ID that doesn't exist
+      .get("/api/articles/404")
       .expect(404)
       .then(({ body }) => {
         expect(body).toEqual({
-          msg: "404 - Error not found",
+          msg: "Article not found",
         });
       });
+  });
+
+  describe("get Articles with Comments", () => {
+    test("200: getting all valid articles", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBeGreaterThan(0);
+          articles.forEach((article) => {
+            expect(typeof article.author).toBe("string");
+            expect(typeof article.title).toBe("string");
+            expect(typeof article.article_id).toBe("number");
+            expect(typeof article.topic).toBe("string");
+            expect(typeof article.created_at).toBe("string");
+            expect(typeof article.votes).toBe("number");
+            expect(typeof article.article_img_url).toBe("string");
+            expect(typeof article.comment_count).toBe("string");
+          });
+        });
+    });
+    test("200: returns all articles sorted by date in descending order", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then((response) => {
+          const { articles } = response.body;
+          expect(Array.isArray(articles)).toBe(true);
+          articles.forEach((article) => {
+            expect(article).toEqual(
+              expect.objectContaining({
+                author: expect.any(String),
+                title: expect.any(String),
+                article_id: expect.any(Number),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+                comment_count: expect.any(String),
+              })
+            );
+            expect(article).not.toHaveProperty("body");
+          });
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+  });
+  test("404: testing that the already built 404 catch catches this endpoint if misstyped.", () => {
+    return request(app).get("/api/articlez").expect(404);
   });
 });
