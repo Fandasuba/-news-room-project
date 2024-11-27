@@ -9,6 +9,7 @@ const {
 } = require("./MCV/get/controller.js");
 const { postNewComments } = require("./MCV/POST/post-controller.js");
 const { patchArticles } = require("./MCV/patch/patch-controller.js");
+const { deleteComments } = require("./MCV/DELETE/delete-controller.js");
 
 app.use(express.json());
 
@@ -25,6 +26,7 @@ app.get("/api/articles/:article_id/comments", fetchCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postNewComments);
 
 app.patch("/api/articles/:article_id", patchArticles);
+app.delete("/api/comments/:comment_id", deleteComments);
 
 app.use((err, req, res, next) => {
   if (err.code === "23502") {

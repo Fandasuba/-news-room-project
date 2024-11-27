@@ -278,3 +278,26 @@ describe("PATCH articles to update votes", () => {
       });
   });
 });
+
+describe("DELETE: deleting comments by ID", () => {
+  test("204: Successfully deleting a comment that exists.", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(() => {
+        return db.query(`SELECT * FROM comments WHERE comment_id = 1`);
+      })
+      .then(({ rows }) => {
+        expect(rows.length).toBe(0);
+      });
+  });
+
+  test("400: Cannot delete a comment that doesn't exist.", () => {
+    return request(app)
+      .delete("/api/comments/500")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Comment ID not found");
+      });
+  });
+});
