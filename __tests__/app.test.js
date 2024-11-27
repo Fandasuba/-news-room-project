@@ -229,3 +229,52 @@ describe("Adding functionality for posting comments to articles.", () => {
       });
   });
 });
+describe("PATCH articles to update votes", () => {
+  test("200: Successfully patch an article via votes", () => {
+    return request(app)
+      .patch("/api/articles/1") // votes are currently present on the first test article.
+      .send({ inc_votes: 10 })
+      .expect(200)
+      .then((response) => {
+        expect(response.body.article.votes).toBe(110);
+      });
+  });
+  test("200:Testing whether articles with no votes get votes.", () => {
+    return request(app)
+      .patch("/api/articles/2") // 2 currently does not have a votes block on it.
+      .send({ inc_votes: 10 })
+      .expect(200)
+      .then((response) => {
+        expect(response.body.article.votes).toBe(10);
+      });
+  });
+  test("200: Should lower the votes of an article", () => {
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send({ inc_votes: -5 })
+      .expect(200)
+      .then((response) => {
+        expect(response.body.article.votes).toBe(95);
+      });
+  });
+
+  test("400: For invalid inc_votes value", () => {
+    return request(app)
+      .patch(`/api/articles/404`)
+      .send({ inc_votes: "invalid" })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid data type in endpoint");
+      });
+  });
+
+  test("400: Should return 400 if votes are not provided", () => {
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send({})
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid input for POST/PATCH.");
+      });
+  });
+});

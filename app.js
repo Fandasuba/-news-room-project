@@ -8,6 +8,7 @@ const {
   fetchCommentsByArticleId,
 } = require("./MCV/get/controller.js");
 const { postNewComments } = require("./MCV/POST/post-controller.js");
+const { patchArticles } = require("./MCV/patch/patch-controller.js");
 
 app.use(express.json());
 
@@ -23,9 +24,11 @@ app.get("/api/articles/:article_id/comments", fetchCommentsByArticleId);
 
 app.post("/api/articles/:article_id/comments", postNewComments);
 
+app.patch("/api/articles/:article_id", patchArticles);
+
 app.use((err, req, res, next) => {
   if (err.code === "23502") {
-    res.status(400).send({ msg: "Invalid inputs in table post." });
+    res.status(400).send({ msg: "Invalid input for POST/PATCH." });
   } else if (err.code === "22P02") {
     res.status(400).send({ msg: "Invalid data type in endpoint" });
   } else if (err.status) {
