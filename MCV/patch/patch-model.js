@@ -2,8 +2,8 @@ const db = require("../../db/connection");
 
 exports.patchArticleByID = (article_Id, inc_votes) => {
   // console.log("model");
-  console.log(article_Id);
-  console.log(inc_votes);
+  //   console.log(article_Id);
+  //   console.log(inc_votes);
   return db
     .query(
       "UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *",
