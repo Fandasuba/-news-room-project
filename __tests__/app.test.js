@@ -183,11 +183,49 @@ describe("Getting comments related to articles.", () => {
   });
 
   test("404: Rejects an article with an invalid article id.", () => {
+    //
     return request(app)
       .get("/api/articles/404/comments")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Article not found");
+      });
+  });
+});
+
+describe("Adding functionality for posting comments to articles.", () => {
+  test("201: Successfully creating new comments.", () => {
+    newComment = {
+      body: "learn to code, journalist.",
+      username: "butter_bridge",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          body: "learn to code, journalist.",
+          author: "butter_bridge",
+        });
+      });
+  });
+  test("400: Successfully rejects content with bad post object.", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid request: Missing username and/or body");
+      });
+  });
+  test("400: Successfully implement errors to prevent posting to bad article ids", () => {
+    return request(app)
+      .post("/api/articles/hi/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "Invalid ID, please use a number ID rather than a string."
+        );
       });
   });
 });

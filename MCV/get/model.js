@@ -1,4 +1,4 @@
-const db = require("./db/connection");
+const db = require("../../db/connection");
 
 exports.getTopics = () => {
   return db.query(`SELECT * FROM topics;`).then((result) => {
@@ -7,6 +7,7 @@ exports.getTopics = () => {
 };
 
 exports.getArticlesById = (article_id) => {
+  // console.log("getArticlesModel");
   return db
     .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
     .then(({ rows }) => {
@@ -19,8 +20,8 @@ exports.getArticlesById = (article_id) => {
       if (err.status === 404) {
         return Promise.reject(err);
       }
-      console.error(err);
-      throw { status: 500, msg: "Internal Server Error" };
+      // console.error(err);
+      return Promise.reject({ status: 500, msg: "Internal Server Error" });
     });
 };
 
@@ -38,7 +39,7 @@ exports.getAllArticles = () => {
       return result.rows;
     })
     .catch((err) => {
-      console.error(err);
+      //   console.error(err);
       throw { status: 500, msg: "Internal Server Error" };
     });
 };
