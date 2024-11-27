@@ -4,7 +4,7 @@ const {
   getAllArticles,
   getCommentsByArticleId,
 } = require("./model");
-const endpointJson = require("./endpoints.json");
+const endpointJson = require("../../endpoints.json");
 
 exports.fetchObject = (req, res) => {
   res.status(200).send({ endpoints: endpointJson });

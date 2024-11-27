@@ -1,0 +1,24 @@
+const db = require("../../db/connection");
+
+exports.parseNewComment = (newComment, article_id) => {
+  const { body, author } = newComment;
+
+  return db
+    .query(
+      `INSERT INTO comments (body, author, article_id) VALUES ($1, $2, $3) RETURNING *;`,
+      [body, author, article_id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 400, msg: "Failed to insert comment" });
+      }
+      return rows[0];
+    })
+    .catch((err) => {
+      if (err.code === "23503" || err.code === "") {
+        return Promise.reject({ status: 404, msg: "Article not found" });
+      }
+      // console.error("Error in parseNewComment:", err);
+      return Promise.reject(err);
+    });
+};
