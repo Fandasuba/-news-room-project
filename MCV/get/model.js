@@ -25,23 +25,40 @@ exports.getArticlesById = (article_id) => {
     });
 };
 
-exports.getAllArticles = () => {
-  return db
-    .query(
-      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.article_img_url, articles.votes,
-      COUNT(comments.article_id) AS comment_count
-      FROM articles
-      LEFT JOIN comments ON comments.article_id = articles.article_id
-      GROUP BY articles.article_id
-      ORDER BY created_at DESC;`
-    )
-    .then((result) => {
-      return result.rows;
-    })
-    .catch((err) => {
-      //   console.error(err);
-      throw { status: 500, msg: "Internal Server Error" };
-    });
+exports.getAllArticles = (sort_By, order) => {
+  const validCategories = [
+    "author",
+    "title",
+    "article_id",
+    "topic",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
+  const validOrder = ["asc", "desc"];
+  if (!validCategories.includes(sort_By)) {
+    throw {
+      status: 400,
+      msg: "Invalid sorting category. Please sort by one of the following: author, title, article_id, topic created_at, votes, comment_count",
+    };
+  }
+  if (!validOrder.includes(order)) {
+    throw {
+      status: 400,
+      msg: "Invalid order, please choose from: asc or desc.",
+    };
+  }
+
+  const queryStr = `
+    SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.article_img_url, articles.votes,
+    COUNT(comments.article_id) AS comment_count
+    FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
+    GROUP BY articles.article_id
+    ORDER BY ${sort_By} ${order};
+  `;
+
+  return db.query(queryStr).then((result) => result.rows);
 };
 
 exports.getCommentsByArticleId = (article_id) => {
