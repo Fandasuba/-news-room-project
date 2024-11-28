@@ -6,6 +6,7 @@ const {
   fetchArticlesId,
   fetchArticles,
   fetchCommentsByArticleId,
+  fetchUsers,
 } = require("./MCV/get/controller.js");
 const { postNewComments } = require("./MCV/POST/post-controller.js");
 const { patchArticles } = require("./MCV/patch/patch-controller.js");
@@ -26,7 +27,10 @@ app.get("/api/articles/:article_id/comments", fetchCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postNewComments);
 
 app.patch("/api/articles/:article_id", patchArticles);
+
 app.delete("/api/comments/:comment_id", deleteComments);
+
+app.get("/api/users", fetchUsers);
 
 app.use((err, req, res, next) => {
   if (err.code === "23502") {
@@ -41,13 +45,7 @@ app.use((err, req, res, next) => {
   }
 });
 
-app.use((err, req, res, next) => {
-  if (err.status) {
-    res.status(err.status).send({ msg: err.msg });
-  } else {
-    console.error(err);
-    res.status(500).send({ msg: "Internal server error" });
-  }
+app.all("*", (req, res) => {
+  res.status(404).send({ msg: "404 - invalid url endpoint." });
 });
-
 module.exports = app;

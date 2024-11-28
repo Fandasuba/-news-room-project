@@ -301,3 +301,30 @@ describe("DELETE: deleting comments by ID", () => {
       });
   });
 });
+
+describe("GET: all users.", () => {
+  test("200: Actually gets everything from the users table.", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { users } = body;
+        expect(Array.isArray(users)).toBe(true);
+        users.forEach((user) => {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          });
+        });
+      });
+  });
+  test("404: test that error catches invalid user request endpoint", () => {
+    return request(app)
+      .get("/api/userz")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("404 - invalid url endpoint.");
+      });
+  });
+});
