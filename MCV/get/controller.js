@@ -3,6 +3,7 @@ const {
   getArticlesById,
   getAllArticles,
   getCommentsByArticleId,
+  getUsers,
 } = require("./model");
 const endpointJson = require("../../endpoints.json");
 
@@ -51,6 +52,20 @@ exports.fetchCommentsByArticleId = (req, res, next) => {
     .catch((err) => {
       if (err.status === 404) {
         return res.status(404).send({ msg: "Article not found" });
+      }
+      next(err);
+    });
+};
+
+exports.fetchUsers = (req, res, next) => {
+  // console.log("IN FETCH USERS");
+  getUsers()
+    .then((rows) => {
+      res.status(200).send({ users: rows });
+    })
+    .catch((err) => {
+      if ((err.status = 404)) {
+        return res.status(404).send({ msg: "Users not found" });
       }
       next(err);
     });

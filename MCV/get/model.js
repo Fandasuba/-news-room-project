@@ -61,3 +61,10 @@ exports.getCommentsByArticleId = (article_id) => {
     })
     .then(({ rows }) => rows);
 };
+
+exports.getUsers = () => {
+  // console.log(" IN GET USERS");
+  return db.query(`SELECT * FROM users;`).then(({ rows }) => {
+    return rows;
+  });
+};
