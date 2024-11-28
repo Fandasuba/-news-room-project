@@ -32,8 +32,10 @@ exports.fetchArticlesId = (req, res, next) => {
 };
 
 exports.fetchArticles = (req, res, next) => {
-  const { sort_by, order } = req.query;
-  getAllArticles(sort_by, order)
+  const { sort_by, order, topic } = req.query;
+  // console.log(req.query, "req.query");
+  // console.log(sort_by, order, topic, "IN CONTROLLER");
+  getAllArticles(sort_by, order, topic)
     .then((rows) => {
       res.status(200).send({ articles: rows });
     })
