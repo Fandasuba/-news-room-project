@@ -143,7 +143,7 @@ describe("get Articles with Comments - Updated for testing for sorting functiona
       .then((response) => {
         expect(response.status).toBe(400);
         expect(response.body.msg).toBe(
-          "Invalid sorting category. Please sort by one of the following: author, title, article_id, created_at, votes, comment_count or topic."
+          "Invalid sorting category. Please sort by one of the following: author, title, article_id, topic, created_at, votes, comment_count."
         );
       });
   });
@@ -161,54 +161,76 @@ describe("get Articles with Comments - Updated for testing for sorting functiona
 });
 
 // task 12 modifiers
-// describe("Adding in topic functionality to articles.", () => {
-//   test("200: Should return articles filtered by coding topic", () => {
-//     return request(app)
-//       .get("/api/articles?topic=coding")
-//       .expect(200)
-//       .then(({ body }) => {
-//         const { articles } = body;
-//         expect(Array.isArray(articles)).toBe(true);
-//         expect(articles.length).toBeGreaterThan(0);
-//         articles.forEach((article) => {
-//           expect(article.topic).toBe("coding");
-//         });
-//       });
-//   });
-//   test("200: Testing that all article are returned if there's no topic set", () => {
-//     return request(app)
-//       .get("/api/articles")
-//       .expect(200)
-//       .then((response) => {
-//         const { articles } = response.body;
-//         expect(articles).toBeInstanceOf(Array);
-//         expect(articles.length).toBeGreaterThan(0);
-//         articles.forEach((article) => {
-//           expect(article).toMatchObject({
-//             author: expect.any(String),
-//             title: expect.any(String),
-//             article_id: expect.any(Number),
-//             topic: expect.any(String),
-//             created_at: expect.any(String),
-//             votes: expect.any(Number),
-//             article_img_url: expect.any(String),
-//             comment_count: expect.any(String),
-//           });
-//         });
-//         expect(articles).toBeSortedBy("created_at", { descending: true });
-//       });
-//   });
-// });
-// test("400: Should return an error for invalid topic", () => {
-//   return request(app)
-//     .get("/api/articles?topic=invalid_topic")
-//     .expect(400)
-//     .then(({ body }) => {
-//       expect(body.msg).toBe(
-//         "Invalid sorting category. Please sort by one of the following: author, title, article_id, created_at, votes, comment_count or topic."
-//       );
-//     });
-// });
+describe("Adding in topic functionality to articles.", () => {
+  test("200: Should return articles filtered by mitch topic only", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+  test("200: Testing for sort by and order, alongside a topic", () => {
+    return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc&topic=mitch")
+      .expect(200)
+      .then((response) => {
+        const { articles } = response.body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: "mitch",
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(String),
+          });
+        });
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("200: Testing that all articles are returned if there's no topic set", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        const { articles } = response.body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(String),
+          });
+        });
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+
+  test("404: Should return an empty array for a topic with no articles", () => {
+    return request(app)
+      .get("/api/articles?topic=nonexistent_topic")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual([]);
+      });
+  });
+});
 
 describe("Getting comments related to articles.", () => {
   test("200: Checks that the article id goes to a live article.", () => {
@@ -251,7 +273,6 @@ describe("Getting comments related to articles.", () => {
   });
 
   test("404: Rejects an article with an invalid article id.", () => {
-    //
     return request(app)
       .get("/api/articles/404/comments")
       .expect(404)

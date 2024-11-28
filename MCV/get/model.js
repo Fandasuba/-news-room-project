@@ -36,12 +36,21 @@ exports.getAllArticles = (sort_By, order, topic) => {
     "comment_count",
   ];
   const validOrder = ["asc", "desc"];
+  if (sort_By === undefined || sort_By === null) {
+    sort_By = "created_at";
+  }
+  if (order === undefined || order === null) {
+    order = "desc";
+  }
   if (!validCategories.includes(sort_By)) {
     throw {
       status: 400,
-      msg: "Invalid sorting category. Please sort by one of the following: author, title, article_id, created_at, votes, comment_count or topic.",
+      msg: `Invalid sorting category. Please sort by one of the following: ${validCategories.join(
+        ", "
+      )}.`,
     };
   }
+
   if (!validOrder.includes(order)) {
     throw {
       status: 400,
@@ -49,20 +58,20 @@ exports.getAllArticles = (sort_By, order, topic) => {
     };
   }
   let queryStr = `
-   SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.article_img_url, articles.votes,
-   COUNT(comments.article_id) AS comment_count
-   FROM articles
-   LEFT JOIN comments ON comments.article_id = articles.article_id
+    SELECT articles.author, articles.title, articles.article_id, articles.topic, 
+    articles.created_at, articles.article_img_url, articles.votes,
+    COUNT(comments.article_id) AS comment_count
+    FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
   `;
   const queryParams = [];
-
   if (topic) {
     queryStr += ` WHERE articles.topic = $1`;
     queryParams.push(topic);
   }
   queryStr += ` 
-   GROUP BY articles.article_id
-   ORDER BY ${sort_By} ${order};
+    GROUP BY articles.article_id
+    ORDER BY ${sort_By} ${order};
   `;
   return db
     .query(queryStr, queryParams)
