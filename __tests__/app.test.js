@@ -225,9 +225,17 @@ describe("Adding in topic functionality to articles.", () => {
   test("404: Should return an empty array for a topic with no articles", () => {
     return request(app)
       .get("/api/articles?topic=nonexistent_topic")
+      .expect(404);
+  });
+
+  test("200: Returns an empty array if the topic is valid but there's no arrays", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
       .expect(200)
-      .then(({ body }) => {
-        expect(body.articles).toEqual([]);
+      .then((response) => {
+        const { articles } = response.body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBe(0);
       });
   });
 });

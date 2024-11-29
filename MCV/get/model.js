@@ -25,7 +25,14 @@ exports.getArticlesById = (article_id) => {
     });
 };
 
-exports.getAllArticles = (sort_By, order, topic) => {
+exports.getAllArticles = async (sort_By, order, topic) => {
+  const validTopics = await findTopics();
+
+  async function findTopics() {
+    const result = await db.query(`SELECT * FROM topics;`);
+    return result.rows.map((row) => row.slug);
+  }
+
   const validCategories = [
     "author",
     "title",
@@ -36,12 +43,15 @@ exports.getAllArticles = (sort_By, order, topic) => {
     "comment_count",
   ];
   const validOrder = ["asc", "desc"];
+
   if (sort_By === undefined || sort_By === null) {
     sort_By = "created_at";
   }
+
   if (order === undefined || order === null) {
     order = "desc";
   }
+
   if (!validCategories.includes(sort_By)) {
     throw {
       status: 400,
@@ -57,6 +67,13 @@ exports.getAllArticles = (sort_By, order, topic) => {
       msg: "Invalid order, please choose from: asc or desc.",
     };
   }
+  if (topic && !validTopics.includes(topic)) {
+    throw {
+      status: 404,
+      msg: `Topic '${topic}' not found.`,
+    };
+  }
+
   let queryStr = `
     SELECT articles.author, articles.title, articles.article_id, articles.topic, 
     articles.created_at, articles.article_img_url, articles.votes,
@@ -64,21 +81,25 @@ exports.getAllArticles = (sort_By, order, topic) => {
     FROM articles
     LEFT JOIN comments ON comments.article_id = articles.article_id
   `;
+
   const queryParams = [];
+
   if (topic) {
     queryStr += ` WHERE articles.topic = $1`;
     queryParams.push(topic);
   }
+
   queryStr += ` 
     GROUP BY articles.article_id
     ORDER BY ${sort_By} ${order};
   `;
-  return db
-    .query(queryStr, queryParams)
-    .then((result) => result.rows)
-    .catch((err) => {
-      throw { status: 500, msg: "Internal Server Error" };
-    });
+
+  try {
+    const result = await db.query(queryStr, queryParams);
+    return result.rows;
+  } catch (err) {
+    throw { status: 500, msg: "Internal Server Error" };
+  }
 };
 
 exports.getCommentsByArticleId = (article_id) => {
