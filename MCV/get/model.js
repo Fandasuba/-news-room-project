@@ -9,7 +9,13 @@ exports.getTopics = () => {
 exports.getArticlesById = (article_id) => {
   // console.log("getArticlesModel");
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
+    .query(
+      `SELECT CAST(COUNT(comments.article_id) AS INTEGER)AS comment_count, articles.* FROM articles 
+LEFT JOIN comments ON articles.article_id = comments.article_id
+WHERE comments.article_id = $1
+GROUP BY articles.article_id;`,
+      [article_id]
+    )
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "Article not found" });
@@ -109,6 +115,7 @@ exports.getCommentsByArticleId = (article_id) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "Article not found" });
       }
+
       return db.query(
         `SELECT comment_id, votes, created_at, author, body, article_id 
         FROM comments 
@@ -117,7 +124,10 @@ exports.getCommentsByArticleId = (article_id) => {
         [article_id]
       );
     })
-    .then(({ rows }) => rows);
+    .then(({ rows }) => {
+      console.log(rows);
+      return rows;
+    });
 };
 
 exports.getUsers = () => {

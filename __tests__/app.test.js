@@ -240,7 +240,7 @@ describe("Adding in topic functionality to articles.", () => {
   });
 });
 
-describe("Getting comments related to articles.", () => {
+describe("Getting comments related to articles. Also included functionality for task 13.", () => {
   test("200: Checks that the article id goes to a live article.", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -286,6 +286,21 @@ describe("Getting comments related to articles.", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Article not found");
+      });
+  });
+
+  // task 13 test added here
+  test("200: Responds with an article object including comment_count", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toEqual(
+          expect.objectContaining({
+            comment_count: expect.any(Number),
+          })
+        );
       });
   });
 });
