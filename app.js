@@ -1,3 +1,4 @@
+const cors = require("cors");
 const express = require("express");
 const app = express();
 const {
@@ -11,6 +12,8 @@ const {
 const { postNewComments } = require("./MCV/POST/post-controller.js");
 const { patchArticles } = require("./MCV/patch/patch-controller.js");
 const { deleteComments } = require("./MCV/DELETE/delete-controller.js");
+
+app.use(cors());
 
 app.use(express.json());
 
