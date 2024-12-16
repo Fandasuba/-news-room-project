@@ -13,7 +13,7 @@ const { postNewComments } = require("./MCV/POST/post-controller.js");
 const { patchArticles } = require("./MCV/patch/patch-controller.js");
 const { deleteComments } = require("./MCV/DELETE/delete-controller.js");
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 app.use(express.json());
 
