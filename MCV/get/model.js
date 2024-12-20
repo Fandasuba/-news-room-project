@@ -35,7 +35,7 @@ exports.getAllArticles = async (sort_By, order, topic) => {
   const validTopics = await findTopics();
 
   async function findTopics() {
-    const result = await db.query(`SELECT * FROM topics;`);
+    const result = await db.query("SELECT * FROM topics;");
     return result.rows.map((row) => row.slug);
   }
 
@@ -50,11 +50,11 @@ exports.getAllArticles = async (sort_By, order, topic) => {
   ];
   const validOrder = ["asc", "desc"];
 
-  if (sort_By === undefined || sort_By === null) {
+  if (!sort_By) {
     sort_By = "created_at";
   }
 
-  if (order === undefined || order === null) {
+  if (!order) {
     order = "desc";
   }
 
@@ -73,6 +73,7 @@ exports.getAllArticles = async (sort_By, order, topic) => {
       msg: "Invalid order, please choose from: asc or desc.",
     };
   }
+
   if (topic && !validTopics.includes(topic)) {
     throw {
       status: 404,
@@ -82,8 +83,8 @@ exports.getAllArticles = async (sort_By, order, topic) => {
 
   let queryStr = `
     SELECT articles.author, articles.title, articles.article_id, articles.topic, 
-    articles.created_at, articles.article_img_url, articles.votes,
-    COUNT(comments.article_id) AS comment_count
+           articles.created_at, articles.article_img_url, articles.votes,
+           COUNT(comments.article_id) AS comment_count
     FROM articles
     LEFT JOIN comments ON comments.article_id = articles.article_id
   `;
@@ -95,7 +96,7 @@ exports.getAllArticles = async (sort_By, order, topic) => {
     queryParams.push(topic);
   }
 
-  queryStr += ` 
+  queryStr += `
     GROUP BY articles.article_id
     ORDER BY ${sort_By} ${order};
   `;
@@ -113,20 +114,22 @@ exports.getCommentsByArticleId = (article_id) => {
     .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
     .then(({ rows }) => {
       if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Article not found" });
+        throw { status: 404, msg: "Article not found" };
       }
 
       return db.query(
         `SELECT comment_id, votes, created_at, author, body, article_id 
-        FROM comments 
-        WHERE article_id = $1
-        ORDER BY created_at DESC;`,
+         FROM comments 
+         WHERE article_id = $1
+         ORDER BY created_at DESC;`,
         [article_id]
       );
     })
     .then(({ rows }) => {
-      // console.log(rows);
       return rows;
+    })
+    .catch((err) => {
+      throw err;
     });
 };
 
