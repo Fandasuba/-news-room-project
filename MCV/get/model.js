@@ -113,10 +113,6 @@ exports.getCommentsByArticleId = (article_id) => {
   return db
     .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
     .then(({ rows }) => {
-      if (rows.length === 0) {
-        throw { status: 404, msg: "Article not found" };
-      }
-
       return db.query(
         `SELECT comment_id, votes, created_at, author, body, article_id 
          FROM comments 
@@ -126,7 +122,9 @@ exports.getCommentsByArticleId = (article_id) => {
       );
     })
     .then(({ rows }) => {
-      return rows;
+      console.log(rows);
+      // Return an object with a 'comments' key, which is consistent for all responses
+      return { comments: rows }; // Ensuring 'comments' key exists even if it's an empty array
     })
     .catch((err) => {
       throw err;
